@@ -3,7 +3,7 @@ module github.com/droplez/droplez-uploader
 go 1.17
 
 require (
-	github.com/droplez/droplez-go-proto v0.0.1-init-24
+	github.com/droplez/droplez-go-proto v0.0.1
 	github.com/google/uuid v1.1.2
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/sirupsen/logrus v1.8.1
