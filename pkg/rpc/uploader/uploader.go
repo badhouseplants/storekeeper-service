@@ -36,11 +36,11 @@ func Register(grpcServer *grpc.Server, unlocked chan bool) {
 
 /*
 * Upload file to Minio
-* This funciton stores the file locally and then put it in the Minio bucket
+* This function stores the file locally and then put it in the Minio bucket
 * First we need to check that system has enough space to store the file
 * * If yes -> just store a file, put ut in the bucket, and remove
 * * If no -> put the request in the queue and wait until the system has enough free space
-* Requsets should respect the order and not be proccessed out of turn
+* Requests should respect the order and not be proccessed out of turn
  */
 func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (err error) {
 	var (
@@ -63,12 +63,7 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 	meta := chunk.GetFileMetadata()
 	var (
 		// If name is empty, generate a new name for minio object
-		minioFileName = func(filename string) string {
-			if len(filename) == 0 {
-				return uuid.New().String() + filepath.Ext(meta.GetLocalName())
-			}
-			return filename
-		}(meta.GetName())
+		minioFileName = uuid.New().String() + filepath.Ext(meta.GetLocalName())
 		minioFileSize = meta.GetFileSize()
 		minioUserID   = meta.GetUserId()
 	)
@@ -96,11 +91,11 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 	 */
 	offset := int64(0)
 
-	// Recieve a file
+	// Receive a file
 	for {
 		chunk, err := stream.Recv()
 
-		// Quit the loop if the whole file is recieved
+		// Quit the loop if the whole file is received
 		if err == io.EOF {
 			break
 		}
@@ -121,7 +116,7 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 	}
 
 	// Put the file in the Minio bucket
-	info, err := minioClient.FPutObject(stream.Context(), minioBucket, minioFileName, fileName, minio.PutObjectOptions{
+	_, err = minioClient.FPutObject(stream.Context(), minioBucket, minioFileName, fileName, minio.PutObjectOptions{
 		PartSize: uint64(minioFileSize),
 		UserTags: map[string]string{
 			"user-id": minioUserID,
@@ -133,14 +128,12 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 	}
 
 	return stream.SendAndClose(&proto_uploader.UploadedFileData{
-		Object:  minioFileName,
-		Version: info.VersionID,
+		Object: minioFileName,
 	})
 }
 
 func (s grpcUploaderImpl) GetDownloadableLink(ctx context.Context, in *proto_uploader.UploadedFileData) (*proto_uploader.DownloadableLink, error) {
 	var (
-		// fileName             = uuid.New().String() // temporary file name for storing locally
 		minioEndpoint        = viper.GetString(constants.MinioEndpoint)
 		minioAccessKeyID     = viper.GetString(constants.MinioAccessKeyID)
 		minioSecretAccessKey = viper.GetString(constants.MinioSecretAccessKey)
@@ -159,10 +152,8 @@ func (s grpcUploaderImpl) GetDownloadableLink(ctx context.Context, in *proto_upl
 
 	// Get downloadable link from minio
 	// info, err := minioClient.PresignedGetObject(ctx, minioBucket, in.Object, time.Minute, url.Values{})
-	info, err := minioClient.PresignedGetObject(ctx, minioBucket, in.Object, time.Minute, url.Values{
-		"versionId": []string{in.GetVersion()},
-	})
-	
+	info, err := minioClient.PresignedGetObject(ctx, minioBucket, in.Object, time.Minute, nil)
+
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}

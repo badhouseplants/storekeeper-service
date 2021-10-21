@@ -68,6 +68,12 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/droplez/droplez-go-proto v0.0.1-init-24 h1:37Ke/bxwcdF5ELS9veB8aK5sAoKypxsyK9UqFRVXqUk=
 github.com/droplez/droplez-go-proto v0.0.1-init-24/go.mod h1:zsk7LzRDijAs1xy9x1JrPA09RdT7lQ3bacyQrU2lFlE=
+github.com/droplez/droplez-go-proto v0.0.3-0.20211021190137-b2101750a10f h1:0gyHGOYKeDXwYiJE3G78DAeceTgO/00izdF+/E8RwkA=
+github.com/droplez/droplez-go-proto v0.0.3-0.20211021190137-b2101750a10f/go.mod h1:zsk7LzRDijAs1xy9x1JrPA09RdT7lQ3bacyQrU2lFlE=
+github.com/droplez/droplez-go-proto v0.0.3-0.20211021190512-bb137f2621ba h1:XzENl6pEVrk615FlxS0C6ZWQspT8jW5pvlYSBttDdFI=
+github.com/droplez/droplez-go-proto v0.0.3-0.20211021190512-bb137f2621ba/go.mod h1:zsk7LzRDijAs1xy9x1JrPA09RdT7lQ3bacyQrU2lFlE=
+github.com/droplez/droplez-go-proto v0.0.3-0.20211021192644-c907d5087bec h1:fhsCRxIrVLNKvoqNgFgPdN8qqtUPhEjwhy5jhat3HuI=
+github.com/droplez/droplez-go-proto v0.0.3-0.20211021192644-c907d5087bec/go.mod h1:zsk7LzRDijAs1xy9x1JrPA09RdT7lQ3bacyQrU2lFlE=
 github.com/dustin/go-humanize v1.0.0 h1:VSnTsYCnlFHaM2/igO1h6X3HA71jcobQuxemgkq4zYo=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
