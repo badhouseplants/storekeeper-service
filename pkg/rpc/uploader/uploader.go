@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -76,7 +75,6 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 	if err != nil {
 		return err
 	}
-
 	// Create a temporary local file to save payload
 	f, err := os.Create(fileName)
 	if err != nil {
@@ -112,11 +110,9 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 		if offset > minioFileSize {
 			return status.Error(codes.InvalidArgument, constants.ErrWrongFileSizeProviced)
 		}
-
 	}
-
 	// Put the file in the Minio bucket
-	_, err = minioClient.FPutObject(stream.Context(), minioBucket, minioFileName, fileName, minio.PutObjectOptions{
+	_, err = minioClient.FPutObject(stream.Context(), minioBucket, meta.GetContentType().String()+"/"+minioFileName, fileName, minio.PutObjectOptions{
 		PartSize: uint64(minioFileSize),
 		UserTags: map[string]string{
 			"user-id": minioUserID,
