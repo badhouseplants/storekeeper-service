@@ -13,7 +13,8 @@ import (
 
 func main() {
 	// var opt []grpc.DialOption
-	conn, err := grpc.Dial("0.0.0.0:9090", grpc.WithInsecure())
+	// conn, err := grpc.Dial("0.0.0.0:9090", grpc.WithInsecure())
+	conn, err := grpc.Dial("droplez-stage.badhouseplants.club:80", grpc.WithInsecure())
 	if err != nil {
 		return
 	}
