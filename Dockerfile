@@ -7,5 +7,6 @@ RUN go build -i main.go
 
 FROM  alpine:3.14.0
 WORKDIR /root/
+COPY migrations/scripts/ /root/migrations/scripts/ 
 COPY --from=builder /go/src/app/main .
 CMD ["./main"]  
