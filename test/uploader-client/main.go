@@ -25,7 +25,8 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-
+	
+		fmt.Println("UPLOADING")
 	arch, err := os.Open("./test/uploader-client/test.zip")
 	if err != nil {
 		fmt.Println(err)

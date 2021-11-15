@@ -1,4 +1,4 @@
-package uploader
+package service
 
 import (
 	"context"
@@ -9,8 +9,9 @@ import (
 	"path/filepath"
 	"time"
 
-	proto_uploader "github.com/droplez/droplez-go-proto/pkg/uploader"
-	"github.com/droplez/droplez-uploader/tools/constants"
+	"github.com/droplez/droplez-go-proto/pkg/uploader"
+	"github.com/droplez/droplez-storekeeper-service/pkg/constants"
+	"github.com/droplez/droplez-storekeeper-service/pkg/tools/logger"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -20,17 +21,13 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Implementation of the uploader grpc service
 type grpcUploaderImpl struct {
-	proto_uploader.UnimplementedUploaderServer
-	Unlocked chan bool
+	uploader.UnimplementedUploaderServer
 }
 
-// Register grpc service
-func Register(grpcServer *grpc.Server, unlocked chan bool) {
-	proto_uploader.RegisterUploaderServer(grpcServer, &grpcUploaderImpl{
-		Unlocked: unlocked,
-	})
+// RegisterUploader grpc service
+func RegisterUploader(grpcServer *grpc.Server) {
+	uploader.RegisterUploaderServer(grpcServer, &grpcUploaderImpl{})
 }
 
 /*
@@ -41,16 +38,17 @@ func Register(grpcServer *grpc.Server, unlocked chan bool) {
 * * If no -> put the request in the queue and wait until the system has enough free space
 * Requests should respect the order and not be proccessed out of turn
  */
-func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (err error) {
+func (s grpcUploaderImpl) Upload(stream uploader.Uploader_UploadServer) (err error) {
 	var (
 		fileName             = uuid.New().String() // temporary file name for storing locally
-		minioEndpoint        = viper.GetString(constants.MinioEndpoint)
-		minioAccessKeyID     = viper.GetString(constants.MinioAccessKeyID)
-		minioSecretAccessKey = viper.GetString(constants.MinioSecretAccessKey)
-		minioBucket          = viper.GetString(constants.MinioBucket)
+		minioEndpoint        = viper.GetString(constants.ConstMinioEndpoint)
+		minioAccessKeyID     = viper.GetString(constants.ConstMinioAccessKeyID)
+		minioSecretAccessKey = viper.GetString(constants.ConstMinioSecretAccessKey)
+		minioBucket          = viper.GetString(constants.ConstMinioBucket)
 		minioUseSSL          = false
 	)
 
+	logger.EndpointHit(stream.Context())
 	// Receive metadata first
 	chunk, err := stream.Recv()
 	if err != nil {
@@ -123,17 +121,17 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 		return err
 	}
 
-	return stream.SendAndClose(&proto_uploader.UploadedFileData{
+	return stream.SendAndClose(&uploader.UploadedFileData{
 		Object: minioFileName,
 	})
 }
 
-func (s grpcUploaderImpl) GetDownloadableLink(ctx context.Context, in *proto_uploader.UploadedFileData) (*proto_uploader.DownloadableLink, error) {
+func (s grpcUploaderImpl) GetDownloadableLink(ctx context.Context, in *uploader.UploadedFileData) (*uploader.DownloadableLink, error) {
 	var (
-		minioEndpoint        = viper.GetString(constants.MinioEndpoint)
-		minioAccessKeyID     = viper.GetString(constants.MinioAccessKeyID)
-		minioSecretAccessKey = viper.GetString(constants.MinioSecretAccessKey)
-		minioBucket          = viper.GetString(constants.MinioBucket)
+		minioEndpoint        = viper.GetString(constants.ConstMinioEndpoint)
+		minioAccessKeyID     = viper.GetString(constants.ConstMinioAccessKeyID)
+		minioSecretAccessKey = viper.GetString(constants.ConstMinioSecretAccessKey)
+		minioBucket          = viper.GetString(constants.ConstMinioBucket)
 		minioUseSSL          = false
 	)
 	fmt.Println(in)
@@ -153,7 +151,7 @@ func (s grpcUploaderImpl) GetDownloadableLink(ctx context.Context, in *proto_upl
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	return &proto_uploader.DownloadableLink{
+	return &uploader.DownloadableLink{
 		Url: info.String(),
 	}, nil
 

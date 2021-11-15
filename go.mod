@@ -1,14 +1,15 @@
-module github.com/droplez/droplez-uploader
+module github.com/droplez/droplez-storekeeper-service
 
 go 1.17
 
 require (
+	github.com/allanger/gitlab-environment-aggregator v0.1.3
 	github.com/droplez/droplez-go-proto v0.0.3-0.20211021192644-c907d5087bec
-	github.com/google/uuid v1.1.2
+	github.com/google/uuid v1.2.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.9.0
-	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf
 	google.golang.org/grpc v1.40.0
 )
 
@@ -34,7 +35,8 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
+	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
+	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
 	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/genproto v0.0.0-20210828152312-66f60bf46e71 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
