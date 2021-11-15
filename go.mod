@@ -1,4 +1,4 @@
-module github.com/droplez/droplez-storekeeper-service
+module github.com/badhouseplants/droplez-storekeeper-service
 
 go 1.17
 

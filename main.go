@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/droplez/droplez-storekeeper-service/pkg/constants"
-	"github.com/droplez/droplez-storekeeper-service/pkg/server"
+	"github.com/badhouseplants/droplez-storekeeper-service/pkg/constants"
+	"github.com/badhouseplants/droplez-storekeeper-service/pkg/server"
 	"github.com/spf13/viper"
 )
 
