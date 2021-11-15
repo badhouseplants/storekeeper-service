@@ -1,17 +1,17 @@
-package uploader
+package service
 
 import (
 	"context"
 	"fmt"
 	"io"
 	"log"
-	"net/url"
 	"os"
 	"path/filepath"
 	"time"
 
-	proto_uploader "github.com/droplez/droplez-go-proto/pkg/uploader"
-	"github.com/droplez/droplez-uploader/tools/constants"
+	"github.com/badhouseplants/droplez-storekeeper-service/pkg/constants"
+	"github.com/badhouseplants/droplez-storekeeper-service/pkg/tools/logger"
+	"github.com/droplez/droplez-go-proto/pkg/uploader"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -21,37 +21,34 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// Implementation of the uploader grpc service
 type grpcUploaderImpl struct {
-	proto_uploader.UnimplementedUploaderServer
-	Unlocked chan bool
+	uploader.UnimplementedUploaderServer
 }
 
-// Register grpc service
-func Register(grpcServer *grpc.Server, unlocked chan bool) {
-	proto_uploader.RegisterUploaderServer(grpcServer, &grpcUploaderImpl{
-		Unlocked: unlocked,
-	})
+// RegisterUploader grpc service
+func RegisterUploader(grpcServer *grpc.Server) {
+	uploader.RegisterUploaderServer(grpcServer, &grpcUploaderImpl{})
 }
 
 /*
 * Upload file to Minio
-* This funciton stores the file locally and then put it in the Minio bucket
+* This function stores the file locally and then put it in the Minio bucket
 * First we need to check that system has enough space to store the file
 * * If yes -> just store a file, put ut in the bucket, and remove
 * * If no -> put the request in the queue and wait until the system has enough free space
-* Requsets should respect the order and not be proccessed out of turn
+* Requests should respect the order and not be proccessed out of turn
  */
-func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (err error) {
+func (s grpcUploaderImpl) Upload(stream uploader.Uploader_UploadServer) (err error) {
 	var (
 		fileName             = uuid.New().String() // temporary file name for storing locally
-		minioEndpoint        = viper.GetString(constants.MinioEndpoint)
-		minioAccessKeyID     = viper.GetString(constants.MinioAccessKeyID)
-		minioSecretAccessKey = viper.GetString(constants.MinioSecretAccessKey)
-		minioBucket          = viper.GetString(constants.MinioBucket)
+		minioEndpoint        = viper.GetString(constants.ConstMinioEndpoint)
+		minioAccessKeyID     = viper.GetString(constants.ConstMinioAccessKeyID)
+		minioSecretAccessKey = viper.GetString(constants.ConstMinioSecretAccessKey)
+		minioBucket          = viper.GetString(constants.ConstMinioBucket)
 		minioUseSSL          = false
 	)
 
+	logger.EndpointHit(stream.Context())
 	// Receive metadata first
 	chunk, err := stream.Recv()
 	if err != nil {
@@ -63,12 +60,7 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 	meta := chunk.GetFileMetadata()
 	var (
 		// If name is empty, generate a new name for minio object
-		minioFileName = func(filename string) string {
-			if len(filename) == 0 {
-				return uuid.New().String() + filepath.Ext(meta.GetLocalName())
-			}
-			return filename
-		}(meta.GetName())
+		minioFileName = uuid.New().String() + filepath.Ext(meta.GetLocalName())
 		minioFileSize = meta.GetFileSize()
 		minioUserID   = meta.GetUserId()
 	)
@@ -81,7 +73,6 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 	if err != nil {
 		return err
 	}
-
 	// Create a temporary local file to save payload
 	f, err := os.Create(fileName)
 	if err != nil {
@@ -96,11 +87,11 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 	 */
 	offset := int64(0)
 
-	// Recieve a file
+	// Receive a file
 	for {
 		chunk, err := stream.Recv()
 
-		// Quit the loop if the whole file is recieved
+		// Quit the loop if the whole file is received
 		if err == io.EOF {
 			break
 		}
@@ -117,11 +108,9 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 		if offset > minioFileSize {
 			return status.Error(codes.InvalidArgument, constants.ErrWrongFileSizeProviced)
 		}
-
 	}
-
 	// Put the file in the Minio bucket
-	info, err := minioClient.FPutObject(stream.Context(), minioBucket, minioFileName, fileName, minio.PutObjectOptions{
+	_, err = minioClient.FPutObject(stream.Context(), minioBucket, meta.GetContentType().String()+"/"+minioFileName, fileName, minio.PutObjectOptions{
 		PartSize: uint64(minioFileSize),
 		UserTags: map[string]string{
 			"user-id": minioUserID,
@@ -132,19 +121,17 @@ func (s grpcUploaderImpl) Upload(stream proto_uploader.Uploader_UploadServer) (e
 		return err
 	}
 
-	return stream.SendAndClose(&proto_uploader.UploadedFileData{
-		Object:  minioFileName,
-		Version: info.VersionID,
+	return stream.SendAndClose(&uploader.UploadedFileData{
+		Object: minioFileName,
 	})
 }
 
-func (s grpcUploaderImpl) GetDownloadableLink(ctx context.Context, in *proto_uploader.UploadedFileData) (*proto_uploader.DownloadableLink, error) {
+func (s grpcUploaderImpl) GetDownloadableLink(ctx context.Context, in *uploader.UploadedFileData) (*uploader.DownloadableLink, error) {
 	var (
-		// fileName             = uuid.New().String() // temporary file name for storing locally
-		minioEndpoint        = viper.GetString(constants.MinioEndpoint)
-		minioAccessKeyID     = viper.GetString(constants.MinioAccessKeyID)
-		minioSecretAccessKey = viper.GetString(constants.MinioSecretAccessKey)
-		minioBucket          = viper.GetString(constants.MinioBucket)
+		minioEndpoint        = viper.GetString(constants.ConstMinioEndpoint)
+		minioAccessKeyID     = viper.GetString(constants.ConstMinioAccessKeyID)
+		minioSecretAccessKey = viper.GetString(constants.ConstMinioSecretAccessKey)
+		minioBucket          = viper.GetString(constants.ConstMinioBucket)
 		minioUseSSL          = false
 	)
 	fmt.Println(in)
@@ -159,14 +146,12 @@ func (s grpcUploaderImpl) GetDownloadableLink(ctx context.Context, in *proto_upl
 
 	// Get downloadable link from minio
 	// info, err := minioClient.PresignedGetObject(ctx, minioBucket, in.Object, time.Minute, url.Values{})
-	info, err := minioClient.PresignedGetObject(ctx, minioBucket, in.Object, time.Minute, url.Values{
-		"versionId": []string{in.GetVersion()},
-	})
-	
+	info, err := minioClient.PresignedGetObject(ctx, minioBucket, in.Object, time.Minute, nil)
+
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
-	return &proto_uploader.DownloadableLink{
+	return &uploader.DownloadableLink{
 		Url: info.String(),
 	}, nil
 
