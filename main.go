@@ -16,7 +16,7 @@ func init() {
 	viper.SetDefault(constants.ConstMinioEndpoint, "localhost:9000")
 	viper.SetDefault(constants.ConstMinioAccessKeyID, "minio")
 	viper.SetDefault(constants.ConstMinioSecretAccessKey, "minio123")
-
+	viper.SetDefault(constants.ConstDroplezStorePath, "./")
 	// Read environment
 	viper.AutomaticEnv()
 }

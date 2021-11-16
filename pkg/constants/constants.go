@@ -10,6 +10,7 @@ const (
 	// Droplez
 	ConstDroplezUploaderPort = "DROPLEZ_UPLOADER_PORT"
 	ConstDroplezUploaderMode = "DROPLEZ_UPLOADER_MODE"
+	ConstDroplezStorePath    = "DROPLEZ_STORE_PATH"
 )
 
 // Modes

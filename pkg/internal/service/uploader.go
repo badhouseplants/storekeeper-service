@@ -40,7 +40,7 @@ func RegisterUploader(grpcServer *grpc.Server) {
  */
 func (s grpcUploaderImpl) Upload(stream uploader.Uploader_UploadServer) (err error) {
 	var (
-		fileName             = uuid.New().String() // temporary file name for storing locally
+		fileName             = fmt.Sprintf("%s/%s", viper.GetString(constants.ConstDroplezStorePath), uuid.New().String())
 		minioEndpoint        = viper.GetString(constants.ConstMinioEndpoint)
 		minioAccessKeyID     = viper.GetString(constants.ConstMinioAccessKeyID)
 		minioSecretAccessKey = viper.GetString(constants.ConstMinioSecretAccessKey)
@@ -73,6 +73,7 @@ func (s grpcUploaderImpl) Upload(stream uploader.Uploader_UploadServer) (err err
 	if err != nil {
 		return err
 	}
+
 	// Create a temporary local file to save payload
 	f, err := os.Create(fileName)
 	if err != nil {
