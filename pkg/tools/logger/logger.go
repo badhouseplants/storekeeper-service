@@ -8,7 +8,7 @@ import (
 	grpcLogrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
 	grpcCtxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
-)
+) 
 
 var (
 	logrusLogger = logrus.New()
