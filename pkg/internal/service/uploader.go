@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/badhouseplants/droplez-storekeeper-service/pkg/constants"
-	"github.com/badhouseplants/droplez-storekeeper-service/pkg/tools/logger"
-	"github.com/droplez/droplez-go-proto/pkg/uploader"
+	"github.com/badhouseplants/storekeeper-service/pkg/constants"
+	"github.com/badhouseplants/storekeeper-service/pkg/tools/logger"
+	"github.com/badhouseplants/storekeeper-go-proto/pkg"
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"

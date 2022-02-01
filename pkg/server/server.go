@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/badhouseplants/droplez-storekeeper-service/pkg/constants"
-	"github.com/badhouseplants/droplez-storekeeper-service/pkg/internal/service"
-	"github.com/badhouseplants/droplez-storekeeper-service/pkg/tools/logger"
+	"github.com/badhouseplants/storekeeper-service/pkg/constants"
+	"github.com/badhouseplants/storekeeper-service/pkg/internal/service"
+	"github.com/badhouseplants/storekeeper-service/pkg/tools/logger"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"

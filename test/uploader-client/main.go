@@ -7,7 +7,7 @@ import (
 	"io"
 	"os"
 
-	proto_uploader "github.com/droplez/droplez-go-proto/pkg/uploader"
+	proto_uploader "github.com/badhouseplants/storekeeper-go-proto/pkg"
 	"google.golang.org/grpc"
 )
 

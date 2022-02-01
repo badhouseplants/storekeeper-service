@@ -1,10 +1,9 @@
-module github.com/badhouseplants/droplez-storekeeper-service
+module github.com/badhouseplants/storekeeper-service
 
 go 1.17
 
 require (
-	github.com/allanger/gitlab-environment-aggregator v0.1.3
-	github.com/droplez/droplez-go-proto v0.0.3-0.20211021192644-c907d5087bec
+	github.com/badhouseplants/storekeeper-go-proto v0.0.1-init-1
 	github.com/google/uuid v1.2.0
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/minio/minio-go/v7 v7.0.14
